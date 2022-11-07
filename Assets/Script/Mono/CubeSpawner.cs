@@ -12,50 +12,56 @@ public class CubeSpawner : MonoBehaviour, IClickScreen
         var target = GameController.s_Instance._target;
         var dist = player.transform.position - target;
         dist.y = 0;
-
-        if (InPlayerBaseCube(dist))
+        var playerColor = player.GetComponent<PlayerChangeColor>()._currColor;
+        if (PlayerInBaseCube(dist))
         {
-            CutterLogic(target, dist);
+            CutterLogic(target, dist, playerColor);
         }
         else
         {
-            CreateCube(ObjectType.DynamicCube, player.transform.position, player.transform.localScale);
+            CreateCube(ObjectType.DynamicCube, player.transform.position, player.transform.localScale, playerColor);
             GameController.s_Instance.EndGame();
         }
     }
 
-    public bool InPlayerBaseCube(Vector3 dist)
+    public bool PlayerInBaseCube(in Vector3 dist)
     {
         return (Mathf.Abs(dist.x) < player.transform.localScale.x  && Mathf.Abs(dist.z) < player.transform.localScale.z);
     }
 
-    public void CutterLogic(Vector3 target, Vector3 dist)
+    public void CutterLogic(in Vector3 target, in Vector3 dist, in Color color)
     {
         var loc = dist / 2;
         loc.y = 0.1f;
         loc += target;
         var scale = player.transform.localScale - Utils.VectorAbs(dist);
-        CreateCube(ObjectType.StaticCube, loc, scale);
+
+        CreateCube(ObjectType.StaticCube, loc, scale, color);
 
         if (dist.x != 0)
         {
-            CreateCube(ObjectType.DynamicCube, new Vector3(dist.x / 2 + scale.x / 2 * Mathf.Sign(dist.x) + loc.x, loc.y, target.z), new Vector3(Mathf.Abs(dist.x), _lenght, scale.z));
+            var pos = new Vector3(dist.x / 2 + scale.x / 2 * Mathf.Sign(dist.x) + loc.x, loc.y, target.z);
+            var scaleDynamic = new Vector3(Mathf.Abs(dist.x), _lenght, scale.z);
+            CreateCube(ObjectType.DynamicCube, pos , scaleDynamic, color);
         }
 
         if (dist.z != 0)
         {
-            CreateCube(ObjectType.DynamicCube, new Vector3(target.x, loc.y, dist.z / 2 + scale.z / 2 * Mathf.Sign(dist.z) + loc.z), new Vector3(scale.x, 0.1f, Mathf.Abs(dist.z)));
+            var pos = new Vector3(target.x, loc.y, dist.z / 2 + scale.z / 2 * Mathf.Sign(dist.z) + loc.z);
+            var scaleDynamic = new Vector3(scale.x, 0.1f, Mathf.Abs(dist.z));
+            CreateCube(ObjectType.DynamicCube, pos, scaleDynamic, color);
         }
 
         player.transform.localScale = scale;
         GameController.s_Instance._target = loc;
     }
 
-    public void CreateCube(ObjectType objectType, in Vector3 transform, in Vector3 scale)
+    public void CreateCube(in ObjectType objectType, in Vector3 transform, in Vector3 scale, in Color color)
     {
         var obj = ObjectPool.s_Instance.GetObject(objectType);
         obj.transform.localScale = scale;
         obj.transform.position = transform;
+        obj.GetComponent<Renderer>().material.color = color;
         obj.SetActive(true);
     }
 }

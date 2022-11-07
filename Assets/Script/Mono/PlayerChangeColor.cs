@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerChangeColor : MonoBehaviour, IClickScreen
+public class PlayerChangeColor : MonoBehaviour, IAfterClickScreen
 {
     Color _white = Color.white;
     Color _black = Color.black;
 
-    Color _currColor = Color.black;
+    [HideInInspector] public Color _currColor = Color.black;
 
     Material _material;
 
