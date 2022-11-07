@@ -27,10 +27,4 @@ public class Movement : MonoBehaviour
     {
         transform.position += _speed * Time.deltaTime * dir;
     }
-
-    public Vector3 CalculateDir(in Vector3 target, in Vector3 me)
-    {
-        var loc = target - me;
-        return Vector3.Normalize(loc);
-    }
 }

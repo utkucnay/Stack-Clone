@@ -11,6 +11,7 @@ public class DestroyForPosition : MonoBehaviour
         if (transform.position.y < _y)
         {
             ObjectPool.s_Instance.SetObject(_objectType, this.gameObject);
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
             this.gameObject.SetActive(false);
         }
     }
