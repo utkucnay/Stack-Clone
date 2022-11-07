@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
+using System.Linq;
 public static class Observer
 {
     public static void RegisterEventFromRoot<T>(Transform root, string methodName, UnityEvent uEvent) where T : IEvent
@@ -36,13 +36,14 @@ public static class Observer
 
     public static void RegisterEventFromAllGameObjects<T>(string methodName, UnityEvent uEvent) where T : IEvent
     {
-        var objects = (MonoBehaviour[])GameObject.FindObjectsOfType(typeof(MonoBehaviour));
+        var objects = (GameObject[])GameObject.FindObjectsOfType(typeof(GameObject));
+        objects = objects.Distinct().ToArray();
         List<T> events = new List<T>();
         foreach (var _object in objects)
         {
-            var _T = _object.GetComponent<T>();
-            if (_T == null) continue;
-            events.Add(_T);
+            var _T = _object.GetComponents<T>();
+            if (_T.Length <= 0) continue;
+            events.AddRange(_T);
         }
         foreach (var _event in events)
         {

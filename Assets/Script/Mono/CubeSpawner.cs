@@ -7,58 +7,55 @@ public class CubeSpawner : MonoBehaviour, IClickScreen
     public GameObject player;
     float _lenght = 0.1f;
 
-    private void Awake()
-    {
-
-    }
-
     public void ClickScreen()
-    {
-        CutterLogic();
-    }
-
-    public void CutterLogic()
     {
         var target = GameController.s_Instance._target;
         var dist = player.transform.position - target;
-
-        if (dist.magnitude > player.transform.localScale.magnitude / 2)
-        {
-            var obj2 = ObjectPool.s_Instance.GetObject(ObjectType.DynamicCube);
-            obj2.transform.position = player.transform.position;
-            obj2.transform.localScale = player.transform.localScale;
-            obj2.SetActive(true);
-            player.SetActive(false);
-            GameController.s_Instance.EndGame();
-            return;
-        }
         dist.y = 0;
 
-        var obj = ObjectPool.s_Instance.GetObject(ObjectType.StaticCube);
-        obj.transform.localScale = player.transform.localScale - Utils.VectorAbs(dist);
-        var offset = dist / 2;
-        offset.y = 0.1f;
-        obj.transform.position = offset + target;
-        obj.SetActive(true);
+        if (InPlayerBaseCube(dist))
+        {
+            CutterLogic(target, dist);
+        }
+        else
+        {
+            CreateCube(ObjectType.DynamicCube, player.transform.position, player.transform.localScale);
+            GameController.s_Instance.EndGame();
+        }
+    }
+
+    public bool InPlayerBaseCube(Vector3 dist)
+    {
+        return (Mathf.Abs(dist.x) < player.transform.localScale.x  && Mathf.Abs(dist.z) < player.transform.localScale.z);
+    }
+
+    public void CutterLogic(Vector3 target, Vector3 dist)
+    {
+        var loc = dist / 2;
+        loc.y = 0.1f;
+        loc += target;
+        var scale = player.transform.localScale - Utils.VectorAbs(dist);
+        CreateCube(ObjectType.StaticCube, loc, scale);
 
         if (dist.x != 0)
         {
-            var obj2 = ObjectPool.s_Instance.GetObject(ObjectType.DynamicCube);
-            obj2.transform.localScale = new Vector3(Mathf.Abs(dist.x), _lenght, obj.transform.localScale.z);
-            obj2.transform.position = new Vector3(dist.x / 2 + obj.transform.localScale.x / 2 * Mathf.Sign(dist.x) + obj.transform.position.x, obj.transform.position.y, target.z);
-            obj2.SetActive(true);
+            CreateCube(ObjectType.DynamicCube, new Vector3(dist.x / 2 + scale.x / 2 * Mathf.Sign(dist.x) + loc.x, loc.y, target.z), new Vector3(Mathf.Abs(dist.x), _lenght, scale.z));
         }
 
         if (dist.z != 0)
         {
-            var obj2 = ObjectPool.s_Instance.GetObject(ObjectType.DynamicCube);
-            obj2.transform.localScale = new Vector3(obj.transform.localScale.x, obj2.transform.localScale.y, Mathf.Abs(dist.z));
-            obj2.transform.position = new Vector3(target.x, obj.transform.position.y, dist.z / 2 + obj.transform.localScale.z / 2 * Mathf.Sign(dist.z) + obj.transform.position.z);
-            obj2.SetActive(true);
+            CreateCube(ObjectType.DynamicCube, new Vector3(target.x, loc.y, dist.z / 2 + scale.z / 2 * Mathf.Sign(dist.z) + loc.z), new Vector3(scale.x, 0.1f, Mathf.Abs(dist.z)));
         }
 
-        player.transform.localScale = obj.transform.localScale;
-        GameController.s_Instance._target = obj.transform.position;
-        player.SetActive(false);
+        player.transform.localScale = scale;
+        GameController.s_Instance._target = loc;
+    }
+
+    public void CreateCube(ObjectType objectType, in Vector3 transform, in Vector3 scale)
+    {
+        var obj = ObjectPool.s_Instance.GetObject(objectType);
+        obj.transform.localScale = scale;
+        obj.transform.position = transform;
+        obj.SetActive(true);
     }
 }

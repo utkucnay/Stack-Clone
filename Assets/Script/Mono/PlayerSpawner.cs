@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnableEvent : MonoBehaviour
+public class PlayerSpawner : MonoBehaviour, IClickScreen
 {
     [SerializeField] float lenght;
     [SerializeField] float height;
@@ -23,5 +23,9 @@ public class EnableEvent : MonoBehaviour
         GetComponent<Movement>()._target = dir.normalized;
         IsZ = !IsZ;
         height += 0.1f;
+    }
+    public void ClickScreen()
+    {
+        this.gameObject.SetActive(false);
     }
 }

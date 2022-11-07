@@ -15,8 +15,12 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.A))
-        {
             e_ClickScreen?.Invoke();
-        }
+        
+
+        if (Input.touchCount > 0)
+            if (Input.GetTouch(0).phase == TouchPhase.Began)
+                e_ClickScreen.Invoke();
+        
     }
 }
